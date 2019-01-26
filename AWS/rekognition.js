@@ -4,6 +4,9 @@ const AWS = require('aws-sdk')
 const debug = require('debug')('node-rekognition:Rekognition')
 const S3 = require('./S3')
 
+const DETECT_ATTR_ALL = ['ALL'];
+const DETECT_ATTR_DEFAULT = ['DEFAULT'];
+
 module.exports = class Rekognition {
     constructor(AWSParameters) {
         this.rekognition = new AWS.Rekognition({
@@ -14,6 +17,14 @@ module.exports = class Rekognition {
 
         this.s3 = new S3(AWSParameters)
         this.bucket = AWSParameters.bucket
+    }
+    
+    static get DETECT_ATTR_ALL() {
+        return DETECT_ATTR_ALL;
+    }
+    
+    static get DETECT_ATTR_DEFAULT() {
+        return DETECT_ATTR_DEFAULT;
     }
 
     /**
@@ -87,11 +98,15 @@ module.exports = class Rekognition {
      * Detects faces within an image
      *
      * @param {Object|Buffer} image
+     * @param {Object} attr - one of defined constants - DETECT_ATTR_ALL for getting ALL attributes in the response and DETECT_ATTR_DEFAULT for DEFAULT
      */
-    async detectFaces(image) {
+    async detectFaces(image, attr=DETECT_ATTR_DEFAULT) {
         const params = {
-            Image: this.getImageParams(image)
+            Image: this.getImageParams(image),
+            Attributes: attr
         }
+        
+        console.log(params);
 
         return await this.doCall('detectFaces', params)
     }
